@@ -1,8 +1,16 @@
 diff --git a/crypto/vold_decrypt/vold_decrypt.cpp b/crypto/vold_decrypt/vold_decrypt.cpp
-index 26801a1..c2a7b5d 100755
+index 26801a1..61ff081 100755
 --- a/crypto/vold_decrypt/vold_decrypt.cpp
 +++ b/crypto/vold_decrypt/vold_decrypt.cpp
-@@ -1016,6 +1016,10 @@ int Exec_vdc_cryptfs(const string& command, const string& argument, vdc_ReturnVa
+@@ -23,6 +23,7 @@
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <sys/mount.h>
++#include <sys/stat.h>
+ #include <sys/time.h>
+ #include <dirent.h>
+ #include <fnmatch.h>
+@@ -1016,6 +1017,10 @@ int Exec_vdc_cryptfs(const string& command, const string& argument, vdc_ReturnVa
  	const char *cmd[] = { "/sbin/vdc_pie", "cryptfs" };
  	if (sdkver < 28)
  		cmd[0] = "/system/bin/vdc";
@@ -13,7 +21,7 @@ index 26801a1..c2a7b5d 100755
  	const char *env[] = { "LD_LIBRARY_PATH=/system/lib64:/system/lib", NULL };
  
  	LOGINFO("sdkver: %d, using %s\n", sdkver, cmd[0]);
-@@ -1048,7 +1052,12 @@ int Exec_vdc_cryptfs(const string& command, const string& argument, vdc_ReturnVa
+@@ -1048,7 +1053,12 @@ int Exec_vdc_cryptfs(const string& command, const string& argument, vdc_ReturnVa
  						  "-E", env[0], cmd[0], cmd[1], command.c_str(), argument.c_str(), NULL);
  			} else
  #endif
@@ -27,7 +35,7 @@ index 26801a1..c2a7b5d 100755
  				execle(cmd[0], cmd[0], cmd[1], command.c_str(), NULL, env);
  			else
  				execle(cmd[0], cmd[0], cmd[1], command.c_str(), argument.c_str(), NULL, env);
-@@ -1229,6 +1238,27 @@ int Run_vdc(const string& Password) {
+@@ -1229,6 +1239,27 @@ int Run_vdc(const string& Password) {
  	return res;
  }
  
@@ -55,7 +63,7 @@ index 26801a1..c2a7b5d 100755
  int Vold_Decrypt_Core(const string& Password) {
  	int res;
  	bool is_vendor_symlinked = false;
-@@ -1299,6 +1329,7 @@ int Vold_Decrypt_Core(const string& Password) {
+@@ -1299,6 +1330,7 @@ int Vold_Decrypt_Core(const string& Password) {
  	is_vendor_symlinked = Symlink_Vendor_Folder();
  	is_firmware_symlinked = Symlink_Firmware_Folder();
  	Symlink_Firmware_Files(is_vendor_symlinked, is_firmware_symlinked);
@@ -63,7 +71,7 @@ index 26801a1..c2a7b5d 100755
  
  	Set_Needed_Properties();
  #ifdef TW_INCLUDE_LIBRESETPROP
-@@ -1383,6 +1414,9 @@ int Vold_Decrypt_Core(const string& Password) {
+@@ -1383,6 +1415,9 @@ int Vold_Decrypt_Core(const string& Password) {
  	}
  #endif
  
