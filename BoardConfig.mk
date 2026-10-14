@@ -53,6 +53,9 @@ BOARD_MKBOOTIMG_ARGS += --ramdisk_offset $(BOARD_RAMDISK_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --second_offset $(BOARD_SECOND_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
+# Samsung bootloader may validate these header fields: mirror the stock recovery.img
+BOARD_MKBOOTIMG_ARGS += --board SRPQL20D008RU
+BOARD_MKBOOTIMG_ARGS += --os_version 10.0.0 --os_patch_level 2021-12
 BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
 # Sorgenti kernel (Samsung opensource, SM-A605G_SEA_QQ) non ancora integrati: per ora solo prebuilt
@@ -84,8 +87,8 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 
 
 # Hack: prevent anti rollback
-PLATFORM_SECURITY_PATCH := 2099-12-31
-VENDOR_SECURITY_PATCH := 2099-12-31
+PLATFORM_SECURITY_PATCH := 2021-12-01
+VENDOR_SECURITY_PATCH := 2021-12-01
 PLATFORM_VERSION := 16.1.0
 
 # Crypto: userdata cifrata FDE a blocco (ro.crypto.type=block, AES-256-XTS), keymaster 3.0
