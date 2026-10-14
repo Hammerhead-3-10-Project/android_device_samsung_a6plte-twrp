@@ -1,5 +1,5 @@
 diff --git a/crypto/vold_decrypt/vold_decrypt.cpp b/crypto/vold_decrypt/vold_decrypt.cpp
-index 26801a1..624c9ef 100755
+index 26801a1..5b53304 100755
 --- a/crypto/vold_decrypt/vold_decrypt.cpp
 +++ b/crypto/vold_decrypt/vold_decrypt.cpp
 @@ -23,6 +23,7 @@
@@ -35,10 +35,57 @@ index 26801a1..624c9ef 100755
  				execle(cmd[0], cmd[0], cmd[1], command.c_str(), NULL, env);
  			else
  				execle(cmd[0], cmd[0], cmd[1], command.c_str(), argument.c_str(), NULL, env);
-@@ -1229,6 +1239,27 @@ int Run_vdc(const string& Password) {
+@@ -1229,6 +1239,74 @@ int Run_vdc(const string& Password) {
  	return res;
  }
  
++#ifdef TW_INCLUDE_LIBRESETPROP
++/* Samsung's sKeymaster (MDFPP) only provides the Root of Trust (integrity/lock/boot state) to the
++ * secure world on "user" builds; on eng/userdebug it logs "invalid rot just set 0" and the key of the
++ * ODE footer cannot be unwrapped. Present the recovery as a user build while vold_decrypt runs. */
++static void Override_Build_Prop(const char* key, const std::string& value, const char* backup_key) {
++	char cur[PROPERTY_VALUE_MAX];
++	property_get(key, cur, "");
++	if (value == cur) {
++		property_set(backup_key, "");
++		return;
++	}
++	property_set(backup_key, cur);
++	int error = TWFunc::Property_Override(key, value);
++	if (error)
++		LOGERROR("Property override of %s failed, code %d\n", key, error);
++	else
++		LOGINFO("Property %s overridden: %s -> %s\n", key, cur, value.c_str());
++}
++
++static void Restore_Build_Prop(const char* key, const char* backup_key) {
++	char orig[PROPERTY_VALUE_MAX];
++	property_get(backup_key, orig, "");
++	if (orig[0] == '\0')
++		return;
++	if (TWFunc::Property_Override(key, std::string(orig)) == 0)
++		LOGINFO("Property %s restored to %s\n", key, orig);
++	property_set(backup_key, "");
++}
++
++static void Update_Build_Type(void) {
++	char fb[PROPERTY_VALUE_MAX];
++	property_get("ro.boot.fastboot", fb, "error");
++	if (strcmp(fb, "error") != 0 || sdkver < 26)
++		return;
++	std::string type = TWFunc::System_Property_Get("ro.build.type");
++	if (type.empty())
++		type = "user";
++	Override_Build_Prop("ro.build.type", type, "vold_decrypt.buildtype_orig");
++	Override_Build_Prop("ro.debuggable", "0", "vold_decrypt.debuggable_orig");
++}
++
++static void Revert_Build_Type(void) {
++	Restore_Build_Prop("ro.build.type", "vold_decrypt.buildtype_orig");
++	Restore_Build_Prop("ro.debuggable", "vold_decrypt.debuggable_orig");
++}
++#endif
++
 +/* Android 10 (sdk >= 29) stock binaries (vold, HALs, vdc) use /system/bin/linker -> /apex/com.android.runtime/bin/linker
 + * and libc from the runtime APEX. The recovery has no apexd, so bind-mount the flattened runtime APEX of the
 + * installed system while vold_decrypt is running. */
@@ -63,7 +110,7 @@ index 26801a1..624c9ef 100755
  int Vold_Decrypt_Core(const string& Password) {
  	int res;
  	bool is_vendor_symlinked = false;
-@@ -1300,7 +1331,8 @@ int Vold_Decrypt_Core(const string& Password) {
+@@ -1300,9 +1378,11 @@ int Vold_Decrypt_Core(const string& Password) {
  	is_firmware_symlinked = Symlink_Firmware_Folder();
  	Symlink_Firmware_Files(is_vendor_symlinked, is_firmware_symlinked);
  
@@ -72,8 +119,19 @@ index 26801a1..624c9ef 100755
 +	bool is_apex_mounted = Mount_Runtime_Apex(); // needs sdkver
  #ifdef TW_INCLUDE_LIBRESETPROP
  	Update_Patch_Level();
++	Update_Build_Type();
  #endif
-@@ -1383,6 +1415,9 @@ int Vold_Decrypt_Core(const string& Password) {
+ 
+ 	// Start services needed for vold decrypt
+@@ -1370,6 +1450,7 @@ int Vold_Decrypt_Core(const string& Password) {
+ 	}
+ #ifdef TW_INCLUDE_LIBRESETPROP
+ 	Revert_Patch_Level();
++	Revert_Build_Type();
+ #endif
+ 	// Stop services needed for vold decrypt so /system can be unmounted
+ 	LOGINFO("Stopping services...\n");
+@@ -1383,6 +1464,9 @@ int Vold_Decrypt_Core(const string& Password) {
  	}
  #endif
  

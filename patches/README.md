@@ -19,3 +19,6 @@ Apply from the TWRP 9.0 tree root (`git -C bootable/recovery apply ...`) before 
   `fdeCheckPassword` is transaction 43 there (29 in AOSP 10, 27 in AOSP 9). Without this vdc_pie called
   `mountAppFuse`/`asecList`. The table was read from `IVold$Stub` in `framework.jar` with `tools/dex_ivold.py`.
 
+  The same patch also presents the recovery as a `user` build (`ro.build.type=user`, `ro.debuggable=0`) while
+  vold_decrypt runs (libresetprop override, restored afterwards): Samsung's sKeymaster only gives the Root of Trust
+  to the secure world on user builds and otherwise logs "invalid rot just set 0".
