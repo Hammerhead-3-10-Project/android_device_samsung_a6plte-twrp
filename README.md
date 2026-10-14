@@ -3,7 +3,7 @@
 TWRP 3.7.0_9-0 (omni `twrp-9.0` minimal manifest), built in an Ubuntu 18.04 container (Python 2, OpenJDK 8).
 
 ## Status (tested on A605FNXXU8CVA1, Android 10 stock, bootloader unlocked)
-- Boots, display (backlight node `/sys/class/leds/lcd-backlight`, max 365), touch, adb (root), MTP/adb USB.
+- Boots, display (backlight node `/sys/class/leds/lcd-backlight`, max 365), touch, adb (root), **MTP** (verified by the user).
 - **`/data` decrypts** with the default password (Samsung/Qualcomm ICE FDE, ODE key manager, MDFPP keymaster).
 - Kernel: Samsung 3.18.124 built from the A605G opensource release with `SEC_FORCE_PERMISSIVE`
   (`prebuilt/kernel`, SELinux always permissive: the stock kernel keeps enforcing and SIGABRTs TWRP).
@@ -19,7 +19,8 @@ TWRP 3.7.0_9-0 (omni `twrp-9.0` minimal manifest), built in an Ubuntu 18.04 cont
 3. `patches/0003`: removes the empty `userdata` dm device left by TWRP's own failed dm-crypt attempt.
 4. `patches/0004` (system/vold): `IVold.aidl` with the Samsung method order (`fdeCheckPassword` = transaction 43).
 5. `recovery/root/init.recovery.qcom.rc`: `ro.hardware.keystore/gatekeeper=mdfpp`, `ro.board.platform`, knox props.
-6. `BoardConfig.mk`: `TW_CRYPTO_USE_SYSTEM_VOLD := qseecomd hwservicemanager servicemanager keymaster-3-0 gatekeeper-1-0 cryptfshw-1-0`,
+6. MTP: `TW_MTP_DEVICE := /dev/usb_mtp_gadget` (Samsung's mtpg node) + `patches/0005` (ffs `MtpDevHandle` honors it).
+7. `BoardConfig.mk`: `TW_CRYPTO_USE_SYSTEM_VOLD := qseecomd hwservicemanager servicemanager keymaster-3-0 gatekeeper-1-0 cryptfshw-1-0`,
    `TW_CRYPTO_SYSTEM_VOLD_MOUNT := vendor`, `TWRP_INCLUDE_LOGCAT := true` (+ `recovery/root/init.recovery.vold_decrypt.*.rc`).
 
 Apply the patches with `bash patches/apply.sh <twrp9 tree>`, then `lunch omni_a6plte-eng && mka recoveryimage`.
