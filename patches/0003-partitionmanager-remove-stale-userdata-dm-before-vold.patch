@@ -1,0 +1,14 @@
+diff --git a/partitionmanager.cpp b/partitionmanager.cpp
+index e58e8ff..4eabd26 100755
+--- a/partitionmanager.cpp
++++ b/partitionmanager.cpp
+@@ -1914,6 +1914,9 @@ int TWPartitionManager::Decrypt_Device(string Password, int user_id) {
+ 
+ #ifdef TW_CRYPTO_USE_SYSTEM_VOLD
+ 	if (pwret != 0) {
++		// The failed internal dm-crypt attempt leaves an empty "userdata" dm device behind, which
++		// makes the stock vold treat it as an unmanaged device and hang: remove it first.
++		delete_crypto_blk_dev("userdata");
+ 		pwret = vold_decrypt(Password);
+ 		switch (pwret) {
+ 			case VD_SUCCESS:

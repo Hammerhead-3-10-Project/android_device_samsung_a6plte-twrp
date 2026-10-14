@@ -8,3 +8,6 @@ Apply from the TWRP 9.0 tree root (`git -C bootable/recovery apply ...`) before 
 - `0002-vold_decrypt-use-twrp-libs-for-vdc_pie-on-android10.patch`: TWRP runs `vdc_pie` (Android 9
   bionic, `/sbin/linker`) with `LD_LIBRARY_PATH=/system/lib64:/system/lib`; on an Android 10 system
   the stock `libc.so` lives in the runtime APEX and cannot be loaded by that linker. For sdk >= 29 use `/sbin`.
+- `0003-partitionmanager-remove-stale-userdata-dm-before-vold.patch`: TWRP first tries its own dm-crypt
+  decryption, which fails on this QCOM ICE (`req-crypt`) device but leaves an empty `userdata` dm device
+  behind; the stock vold then sees an unmanaged device with that name and hangs. Delete it before vold_decrypt.
