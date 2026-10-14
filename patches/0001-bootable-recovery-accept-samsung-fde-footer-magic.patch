@@ -1,0 +1,14 @@
+diff --git a/crypto/fde/cryptfs.cpp b/crypto/fde/cryptfs.cpp
+index 9750b25..07b3e0e 100644
+--- a/crypto/fde/cryptfs.cpp
++++ b/crypto/fde/cryptfs.cpp
+@@ -966,7 +966,8 @@ static int get_crypt_ftr_and_key(struct crypt_mnt_ftr *crypt_ftr)
+     goto errout;
+   }
+ 
+-  if (crypt_ftr->magic != CRYPT_MNT_MAGIC) {
++  /* Samsung/Qualcomm ICE FDE (a6plte) writes magic 0xD0B5B1C5 instead of the AOSP 0xD0B5B1C4 */
++  if (crypt_ftr->magic != CRYPT_MNT_MAGIC && crypt_ftr->magic != 0xD0B5B1C5) {
+     SLOGE("Bad magic for real block device %s\n", fname);
+     goto errout;
+   }
