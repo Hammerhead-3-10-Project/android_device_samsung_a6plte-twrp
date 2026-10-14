@@ -99,6 +99,9 @@ TW_INCLUDE_CRYPTO := true
 # vendor HALs from the recovery. Service names must match the init.recovery.vold_decrypt.<name>.rc
 TW_CRYPTO_USE_SYSTEM_VOLD := qseecomd hwservicemanager servicemanager keymaster-3-0 gatekeeper-1-0 cryptfshw-1-0
 TW_CRYPTO_SYSTEM_VOLD_MOUNT := vendor
+# logd + logcat in the recovery, needed to read what the stock vold says while decrypting
+TWRP_INCLUDE_LOGCAT := true
+TARGET_USES_LOGD := true
 # TODO: needs vendor/qcom cryptfs_hw (libcryptfs_hw), not in the minimal manifest
 # TARGET_HW_DISK_ENCRYPTION := true
 
