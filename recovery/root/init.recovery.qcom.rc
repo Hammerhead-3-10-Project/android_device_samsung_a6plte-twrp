@@ -52,11 +52,5 @@ service twrp_dbg /sbin/sh /sbin/twrp_dbg.sh
 # The debug service is not started by default (it reboots the phone after ~50 s).
 # To use it again: add "start twrp_dbg" to an "on boot" block.
 
-# Android 10 binaries (vold, HALs) need the bionic linker and libc from the runtime APEX:
-# /system/bin/linker -> /apex/com.android.runtime/bin/linker. The recovery has no apexd, so
-# bind-mount the flattened runtime APEX of the installed system right before vold_decrypt starts
-# the services (vold_decrypt sets this property while it prepares the stock system).
-on property:vold_decrypt.symlinked_firmware=*
-    mkdir /apex 0755 root root
-    mkdir /apex/com.android.runtime 0755 root root
-    mount none /system/apex/com.android.runtime.release /apex/com.android.runtime bind
+# The runtime APEX bind mount for the stock vold is now done by the patched vold_decrypt.cpp
+# (patches/0002), so it is also unmounted cleanly after every decryption attempt.

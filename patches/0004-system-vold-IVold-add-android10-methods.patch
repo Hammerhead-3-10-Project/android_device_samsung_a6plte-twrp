@@ -1,0 +1,16 @@
+diff --git a/binder/android/os/IVold.aidl b/binder/android/os/IVold.aidl
+index 3a54390..26126ec 100644
+--- a/binder/android/os/IVold.aidl
++++ b/binder/android/os/IVold.aidl
+@@ -32,6 +32,11 @@ interface IVold {
+     void onUserStarted(int userId);
+     void onUserStopped(int userId);
+ 
++    // Added in Android 10: the stock a6plte vold has them, so the transaction codes of every
++    // method after them (fdeCheckPassword, ...) shift by two compared to Android 9.
++    void addAppIds(in @utf8InCpp String[] packageNames, in int[] appIds);
++    void addSandboxIds(in int[] appIds, in @utf8InCpp String[] sandboxIds);
++
+     void onSecureKeyguardStateChanged(boolean isShowing);
+ 
+     void partition(@utf8InCpp String diskId, int partitionType, int ratio);

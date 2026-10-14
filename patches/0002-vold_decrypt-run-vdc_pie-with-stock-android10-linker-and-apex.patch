@@ -1,0 +1,75 @@
+diff --git a/crypto/vold_decrypt/vold_decrypt.cpp b/crypto/vold_decrypt/vold_decrypt.cpp
+index 26801a1..c2a7b5d 100755
+--- a/crypto/vold_decrypt/vold_decrypt.cpp
++++ b/crypto/vold_decrypt/vold_decrypt.cpp
+@@ -1016,6 +1016,10 @@ int Exec_vdc_cryptfs(const string& command, const string& argument, vdc_ReturnVa
+ 	const char *cmd[] = { "/sbin/vdc_pie", "cryptfs" };
+ 	if (sdkver < 28)
+ 		cmd[0] = "/system/bin/vdc";
++	// On Android 10 vdc_pie (built against the Android 9 AIDL/bionic) must run with the stock Android 10 linker
++	// and libs, otherwise its libbinder is incompatible with the stock servicemanager (work source header).
++	const bool use_stock_linker = (sdkver >= 29);
++	const char *stock_linker = "/apex/com.android.runtime/bin/linker";
+ 	const char *env[] = { "LD_LIBRARY_PATH=/system/lib64:/system/lib", NULL };
+ 
+ 	LOGINFO("sdkver: %d, using %s\n", sdkver, cmd[0]);
+@@ -1048,7 +1052,12 @@ int Exec_vdc_cryptfs(const string& command, const string& argument, vdc_ReturnVa
+ 						  "-E", env[0], cmd[0], cmd[1], command.c_str(), argument.c_str(), NULL);
+ 			} else
+ #endif
+-			if (argument.empty())
++			if (use_stock_linker) {
++				if (argument.empty())
++					execle(stock_linker, "linker", cmd[0], cmd[1], command.c_str(), NULL, env);
++				else
++					execle(stock_linker, "linker", cmd[0], cmd[1], command.c_str(), argument.c_str(), NULL, env);
++			} else if (argument.empty())
+ 				execle(cmd[0], cmd[0], cmd[1], command.c_str(), NULL, env);
+ 			else
+ 				execle(cmd[0], cmd[0], cmd[1], command.c_str(), argument.c_str(), NULL, env);
+@@ -1229,6 +1238,27 @@ int Run_vdc(const string& Password) {
+ 	return res;
+ }
+ 
++/* Android 10 (sdk >= 29) stock binaries (vold, HALs, vdc) use /system/bin/linker -> /apex/com.android.runtime/bin/linker
++ * and libc from the runtime APEX. The recovery has no apexd, so bind-mount the flattened runtime APEX of the
++ * installed system while vold_decrypt is running. */
++static bool Mount_Runtime_Apex(void) {
++	if (sdkver < 29)
++		return false;
++	mkdir("/apex", 0755);
++	mkdir("/apex/com.android.runtime", 0755);
++	umount2("/apex/com.android.runtime", MNT_DETACH); // never stack mounts
++	if (mount("/system/apex/com.android.runtime.release", "/apex/com.android.runtime", NULL, MS_BIND, NULL) != 0) {
++		LOGERROR("Failed to bind-mount the runtime APEX: %s\n", strerror(errno));
++		return false;
++	}
++	LOGINFO("Runtime APEX mounted for the stock vold.\n");
++	return true;
++}
++
++static void Unmount_Runtime_Apex(void) {
++	umount2("/apex/com.android.runtime", MNT_DETACH);
++}
++
+ int Vold_Decrypt_Core(const string& Password) {
+ 	int res;
+ 	bool is_vendor_symlinked = false;
+@@ -1299,6 +1329,7 @@ int Vold_Decrypt_Core(const string& Password) {
+ 	is_vendor_symlinked = Symlink_Vendor_Folder();
+ 	is_firmware_symlinked = Symlink_Firmware_Folder();
+ 	Symlink_Firmware_Files(is_vendor_symlinked, is_firmware_symlinked);
++	bool is_apex_mounted = Mount_Runtime_Apex();
+ 
+ 	Set_Needed_Properties();
+ #ifdef TW_INCLUDE_LIBRESETPROP
+@@ -1383,6 +1414,9 @@ int Vold_Decrypt_Core(const string& Password) {
+ 	}
+ #endif
+ 
++	if (is_apex_mounted)
++		Unmount_Runtime_Apex();
++
+ 	if (is_firmware_symlinked)
+ 		Restore_Firmware_Folder();
+ 	if (is_vendor_symlinked)
