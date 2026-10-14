@@ -13,6 +13,9 @@ Apply from the TWRP 9.0 tree root (`git -C bootable/recovery apply ...`) before 
   that the Android 9 libbinder does not send, so `checkService("vold")` returned null and vdc looped for 50 s).
   vold_decrypt now bind-mounts the flattened runtime APEX (`/apex/com.android.runtime`, unmounted afterwards) and
   runs `vdc_pie` through `/apex/com.android.runtime/bin/linker` with the stock `/system/lib` libs.
-- `0004-system-vold-IVold-add-android10-methods.patch` (apply in `system/vold`): Android 10 added `addAppIds` and
-  `addSandboxIds` before `fdeCheckPassword`; without them vdc_pie called method 27 (`mountAppFuse` in the stock
-  vold) instead of 29 (`fdeCheckPassword`).
+- `0004-system-vold-IVold-samsung-android10-method-order.patch` (apply in `system/vold`): the stock Samsung vold
+  of the A605FN has a different `IVold` method order than AOSP 9/10 (Android 10 added `addAppIds` and
+  `addSandboxIds`; Samsung added 11 `asec*` calls, `runIdleDefrag` and two `...ServiceSnsDataRedirect`).
+  `fdeCheckPassword` is transaction 43 there (29 in AOSP 10, 27 in AOSP 9). Without this vdc_pie called
+  `mountAppFuse`/`asecList`. The table was read from `IVold$Stub` in `framework.jar` with `tools/dex_ivold.py`.
+

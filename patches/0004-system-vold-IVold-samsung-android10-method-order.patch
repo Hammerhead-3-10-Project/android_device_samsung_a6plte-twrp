@@ -1,0 +1,51 @@
+diff --git a/binder/android/os/IVold.aidl b/binder/android/os/IVold.aidl
+index 3a54390..a61def9 100644
+--- a/binder/android/os/IVold.aidl
++++ b/binder/android/os/IVold.aidl
+@@ -32,6 +32,12 @@ interface IVold {
+     void onUserStarted(int userId);
+     void onUserStopped(int userId);
+ 
++    // --- Method order of the stock Samsung A605FN (Android 10) vold, read from framework.jar IVold$Stub ---
++    // Only fdeCheckPassword is ever called by vdc_pie; the other added methods exist solely to give it the
++    // same transaction code (43) as the stock vold. Their arguments are irrelevant.
++    void addAppIds(in @utf8InCpp String[] packageNames, in int[] appIds);
++    void addSandboxIds(in int[] appIds, in @utf8InCpp String[] sandboxIds);
++
+     void onSecureKeyguardStateChanged(boolean isShowing);
+ 
+     void partition(@utf8InCpp String diskId, int partitionType, int ratio);
+@@ -43,6 +49,19 @@ interface IVold {
+     void benchmark(@utf8InCpp String volId, IVoldTaskListener listener);
+     void checkEncryption(@utf8InCpp String volId);
+ 
++    // Samsung ASEC methods (codes 19..29)
++    void asecCreate();
++    void asecResize();
++    void asecFinalize();
++    void asecFixperms();
++    void asecDestroy();
++    void asecMount();
++    void asecUnmount();
++    void asecRename();
++    void asecPath();
++    void asecFsPath();
++    void asecList();
++
+     void moveStorage(@utf8InCpp String fromVolId, @utf8InCpp String toVolId,
+             IVoldTaskListener listener);
+ 
+@@ -56,10 +75,13 @@ interface IVold {
+ 
+     void fstrim(int fstrimFlags, IVoldTaskListener listener);
+     void runIdleMaint(IVoldTaskListener listener);
++    void runIdleDefrag(); // Samsung
+     void abortIdleMaint(IVoldTaskListener listener);
+ 
+     FileDescriptor mountAppFuse(int uid, int pid, int mountId);
+     void unmountAppFuse(int uid, int pid, int mountId);
++    void startServiceSnsDataRedirect(); // Samsung
++    void stopServiceSnsDataRedirect(); // Samsung
+ 
+     void fdeCheckPassword(@utf8InCpp String password);
+     void fdeRestart();
