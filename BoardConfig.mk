@@ -95,7 +95,8 @@ TARGET_HW_DISK_ENCRYPTION := true
 
 # TWRP Configuration
 TW_THEME := portrait_hdpi
-TW_EXTRA_LANGUAGES := true
+# Keep recovery.img under 30 MiB: heimdall 2.1.0 fails on this bootloader when the upload crosses the first 30 MiB sequence
+TW_EXTRA_LANGUAGES := false
 TW_SCREEN_BLANK_ON_BOOT := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_USE_TOOLBOX := true
@@ -106,5 +107,5 @@ TW_DEFAULT_BRIGHTNESS := 128
 TW_EXCLUDE_DEFAULT_USB_INIT := false
 TW_HAS_DOWNLOAD_MODE := true
 TW_NO_REBOOT_BOOTLOADER := true
-TW_INCLUDE_NTFS_3G := true
+TW_INCLUDE_NTFS_3G := false
 RECOVERY_SDCARD_ON_DATA := true
