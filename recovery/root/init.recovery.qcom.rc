@@ -31,6 +31,9 @@
 # init.recovery.usb.rc drives /sys/class/android_usb instead.
 
 on init
+    # hw_get_module() picks keystore.msm8953.so / gatekeeper.msm8953.so from this property;
+    # without it the stock keymaster HAL falls back to a software implementation and gatekeeper crashes
+    setprop ro.board.platform msm8953
     # Panel backlight is /sys/class/leds/lcd-backlight (max 365); /sys/class/backlight/panel has max 0
     write /sys/class/leds/lcd-backlight/brightness 200
 
