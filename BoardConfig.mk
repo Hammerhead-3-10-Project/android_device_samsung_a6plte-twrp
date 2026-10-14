@@ -37,8 +37,9 @@ BOARD_USES_QCOM_HARDWARE := true
 TARGET_SCREEN_DENSITY := 420
 
 # Kernel: prebuilt stock = Image.gz-dtb (gzip(Image arm64) + 5 dtb), identico in boot e recovery
-# Header (da unpack_bootimg): base 0x0, kernel 0x80008000, ramdisk 0x82000000, second 0x80f00000, tags 0x81e00000
-BOARD_KERNEL_BASE := 0x00000000
+# Indirizzi assoluti stock (unpack_bootimg li mostra con base 0): kernel 0x80008000, ramdisk 0x82000000, second 0x80f00000, tags 0x81e00000
+# => base 0x80000000 + offset (mkbootimg somma base+offset)
+BOARD_KERNEL_BASE := 0x80000000
 BOARD_KERNEL_OFFSET := 0x00008000
 BOARD_RAMDISK_OFFSET := 0x02000000
 BOARD_SECOND_OFFSET := 0x00f00000
