@@ -1,5 +1,5 @@
 diff --git a/crypto/vold_decrypt/vold_decrypt.cpp b/crypto/vold_decrypt/vold_decrypt.cpp
-index 26801a1..61ff081 100755
+index 26801a1..624c9ef 100755
 --- a/crypto/vold_decrypt/vold_decrypt.cpp
 +++ b/crypto/vold_decrypt/vold_decrypt.cpp
 @@ -23,6 +23,7 @@
@@ -63,14 +63,16 @@ index 26801a1..61ff081 100755
  int Vold_Decrypt_Core(const string& Password) {
  	int res;
  	bool is_vendor_symlinked = false;
-@@ -1299,6 +1330,7 @@ int Vold_Decrypt_Core(const string& Password) {
- 	is_vendor_symlinked = Symlink_Vendor_Folder();
+@@ -1300,7 +1331,8 @@ int Vold_Decrypt_Core(const string& Password) {
  	is_firmware_symlinked = Symlink_Firmware_Folder();
  	Symlink_Firmware_Files(is_vendor_symlinked, is_firmware_symlinked);
-+	bool is_apex_mounted = Mount_Runtime_Apex();
  
- 	Set_Needed_Properties();
+-	Set_Needed_Properties();
++	Set_Needed_Properties(); // also sets sdkver from the installed system
++	bool is_apex_mounted = Mount_Runtime_Apex(); // needs sdkver
  #ifdef TW_INCLUDE_LIBRESETPROP
+ 	Update_Patch_Level();
+ #endif
 @@ -1383,6 +1415,9 @@ int Vold_Decrypt_Core(const string& Password) {
  	}
  #endif
