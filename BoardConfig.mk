@@ -92,7 +92,8 @@ PLATFORM_VERSION := 16.1.0
 # Crypto: userdata cifrata FDE a blocco (ro.crypto.type=block, AES-256-XTS), keymaster 3.0
 # TODO verificare che la decifratura funzioni (serve il blob keymaster e vendor montato)
 TW_INCLUDE_CRYPTO := true
-TARGET_HW_DISK_ENCRYPTION := true
+# TODO: needs vendor/qcom cryptfs_hw (libcryptfs_hw), not in the minimal manifest
+# TARGET_HW_DISK_ENCRYPTION := true
 
 # TWRP Configuration
 TW_THEME := portrait_hdpi
