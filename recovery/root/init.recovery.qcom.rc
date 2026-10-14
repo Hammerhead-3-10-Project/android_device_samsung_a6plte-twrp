@@ -46,5 +46,5 @@ service twrp_dbg /sbin/sh /sbin/twrp_dbg.sh
     oneshot
     disabled
 
-on boot
-    start twrp_dbg
+# The debug service is not started by default (it reboots the phone after ~50 s).
+# To use it again: add "start twrp_dbg" to an "on boot" block.
