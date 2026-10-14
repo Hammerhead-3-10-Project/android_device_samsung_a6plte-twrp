@@ -99,13 +99,12 @@ TW_INCLUDE_CRYPTO := true
 TW_THEME := portrait_hdpi
 # Keep recovery.img under 30 MiB: heimdall 2.1.0 fails on this bootloader when the upload crosses the first 30 MiB sequence
 TW_EXTRA_LANGUAGES := false
-TW_SCREEN_BLANK_ON_BOOT := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_USE_TOOLBOX := true
 TW_DEFAULT_LANGUAGE := it
-TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel/brightness"
-TW_MAX_BRIGHTNESS := 255 # TODO verificare (max_brightness illeggibile senza root)
-TW_DEFAULT_BRIGHTNESS := 128
+TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
+TW_MAX_BRIGHTNESS := 365
+TW_DEFAULT_BRIGHTNESS := 200
 TW_EXCLUDE_DEFAULT_USB_INIT := false
 TW_HAS_DOWNLOAD_MODE := true
 TW_NO_REBOOT_BOOTLOADER := true
