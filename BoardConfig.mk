@@ -76,6 +76,9 @@ BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_COPY_OUT_VENDOR := vendor
 TARGET_COPY_OUT_ODM := odm
 
+# SELinux policy for the recovery domain (permissive)
+BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+
 # Recovery
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true

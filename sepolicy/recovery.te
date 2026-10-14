@@ -1,0 +1,3 @@
+# The stock kernel ignores enforcing=0 and the set_permissive service fails,
+# so make the recovery domain permissive in the policy shipped in the ramdisk.
+permissive recovery;
