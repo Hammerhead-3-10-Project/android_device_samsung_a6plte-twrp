@@ -1,5 +1,5 @@
 diff --git a/crypto/vold_decrypt/vold_decrypt.cpp b/crypto/vold_decrypt/vold_decrypt.cpp
-index 26801a1..5b53304 100755
+index 26801a1..f25256d 100755
 --- a/crypto/vold_decrypt/vold_decrypt.cpp
 +++ b/crypto/vold_decrypt/vold_decrypt.cpp
 @@ -23,6 +23,7 @@
@@ -35,7 +35,7 @@ index 26801a1..5b53304 100755
  				execle(cmd[0], cmd[0], cmd[1], command.c_str(), NULL, env);
  			else
  				execle(cmd[0], cmd[0], cmd[1], command.c_str(), argument.c_str(), NULL, env);
-@@ -1229,6 +1239,74 @@ int Run_vdc(const string& Password) {
+@@ -1229,6 +1239,95 @@ int Run_vdc(const string& Password) {
  	return res;
  }
  
@@ -107,23 +107,45 @@ index 26801a1..5b53304 100755
 +	umount2("/apex/com.android.runtime", MNT_DETACH);
 +}
 +
++/* The Samsung MDFPP keymaster (and the other TrustZone apps) load their trustlets from
++ * /vendor/firmware_mnt/image (apnhlos partition, mounted by init.target.rc on a stock boot).
++ * Without them QSEECom_start_app fails (error -49) and the ODE key manager gets a zero Root of Trust. */
++static bool Mount_Firmware_Trustlets(void) {
++	if (TWFunc::Path_Exists("/vendor/firmware_mnt/image"))
++		return false; // already available
++	mkdir("/vendor/firmware_mnt", 0755);
++	umount2("/vendor/firmware_mnt", MNT_DETACH);
++	if (mount("/dev/block/bootdevice/by-name/apnhlos", "/vendor/firmware_mnt", "vfat", MS_RDONLY,
++			"shortname=lower,uid=0,gid=1000,dmask=227,fmask=337") != 0) {
++		LOGERROR("Failed to mount apnhlos on /vendor/firmware_mnt: %s\n", strerror(errno));
++		return false;
++	}
++	LOGINFO("Firmware trustlets mounted on /vendor/firmware_mnt.\n");
++	return true;
++}
++
++static void Unmount_Firmware_Trustlets(void) {
++	umount2("/vendor/firmware_mnt", MNT_DETACH);
++}
++
  int Vold_Decrypt_Core(const string& Password) {
  	int res;
  	bool is_vendor_symlinked = false;
-@@ -1300,9 +1378,11 @@ int Vold_Decrypt_Core(const string& Password) {
+@@ -1300,9 +1399,12 @@ int Vold_Decrypt_Core(const string& Password) {
  	is_firmware_symlinked = Symlink_Firmware_Folder();
  	Symlink_Firmware_Files(is_vendor_symlinked, is_firmware_symlinked);
  
 -	Set_Needed_Properties();
 +	Set_Needed_Properties(); // also sets sdkver from the installed system
 +	bool is_apex_mounted = Mount_Runtime_Apex(); // needs sdkver
++	bool is_trustlets_mounted = Mount_Firmware_Trustlets();
  #ifdef TW_INCLUDE_LIBRESETPROP
  	Update_Patch_Level();
 +	Update_Build_Type();
  #endif
  
  	// Start services needed for vold decrypt
-@@ -1370,6 +1450,7 @@ int Vold_Decrypt_Core(const string& Password) {
+@@ -1370,6 +1472,7 @@ int Vold_Decrypt_Core(const string& Password) {
  	}
  #ifdef TW_INCLUDE_LIBRESETPROP
  	Revert_Patch_Level();
@@ -131,10 +153,12 @@ index 26801a1..5b53304 100755
  #endif
  	// Stop services needed for vold decrypt so /system can be unmounted
  	LOGINFO("Stopping services...\n");
-@@ -1383,6 +1464,9 @@ int Vold_Decrypt_Core(const string& Password) {
+@@ -1383,6 +1486,11 @@ int Vold_Decrypt_Core(const string& Password) {
  	}
  #endif
  
++	if (is_trustlets_mounted)
++		Unmount_Firmware_Trustlets();
 +	if (is_apex_mounted)
 +		Unmount_Runtime_Apex();
 +

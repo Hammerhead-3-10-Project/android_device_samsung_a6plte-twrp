@@ -22,3 +22,5 @@ Apply from the TWRP 9.0 tree root (`git -C bootable/recovery apply ...`) before 
   The same patch also presents the recovery as a `user` build (`ro.build.type=user`, `ro.debuggable=0`) while
   vold_decrypt runs (libresetprop override, restored afterwards): Samsung's sKeymaster only gives the Root of Trust
   to the secure world on user builds and otherwise logs "invalid rot just set 0".
+  And it mounts the apnhlos partition on `/vendor/firmware_mnt` (read-only, like `init.target.rc`) so the Samsung
+  MDFPP keymaster can load its trustlet (`image/skeymast*`); otherwise `QSEECom_start_app` fails with -49.
