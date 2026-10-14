@@ -12,3 +12,4 @@ apply bootable/recovery 0001-bootable-recovery-accept-samsung-fde-footer-magic.p
 apply bootable/recovery 0002-vold_decrypt-run-vdc_pie-with-stock-android10-linker-and-apex.patch
 apply bootable/recovery 0003-partitionmanager-remove-stale-userdata-dm-before-vold.patch
 apply system/vold      0004-system-vold-IVold-samsung-android10-method-order.patch
+apply bootable/recovery 0005-mtp-ffs-honor-TW_MTP_DEVICE-in-MtpDevHandle.patch

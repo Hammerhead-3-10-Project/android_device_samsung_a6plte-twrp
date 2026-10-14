@@ -1,0 +1,19 @@
+diff --git a/mtp/ffs/MtpDevHandle.cpp b/mtp/ffs/MtpDevHandle.cpp
+index e22ba55..7eb28cd 100644
+--- a/mtp/ffs/MtpDevHandle.cpp
++++ b/mtp/ffs/MtpDevHandle.cpp
+@@ -31,7 +31,14 @@
+ 
+ #include "MtpDevHandle.h"
+ 
++#ifdef USB_MTP_DEVICE
++// TW_MTP_DEVICE: devices whose gadget driver is not /dev/mtp_usb (e.g. Samsung's /dev/usb_mtp_gadget)
++#define MTPDEV_STRINGIFY(x) #x
++#define MTPDEV_EXPAND(x) MTPDEV_STRINGIFY(x)
++constexpr char mtp_dev_path[] = MTPDEV_EXPAND(USB_MTP_DEVICE);
++#else
+ constexpr char mtp_dev_path[] = "/dev/mtp_usb";
++#endif
+ 
+ MtpDevHandle::MtpDevHandle(int controlFd) {
+ 	mFd.reset(controlFd);
