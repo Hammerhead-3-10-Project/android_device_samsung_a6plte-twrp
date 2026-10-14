@@ -34,6 +34,16 @@ on init
     # hw_get_module() picks keystore.msm8953.so / gatekeeper.msm8953.so from this property;
     # without it the stock keymaster HAL falls back to a software implementation and gatekeeper crashes
     setprop ro.board.platform msm8953
+    # In Android the keymaster/gatekeeper HALs load keystore.mdfpp.so / gatekeeper.mdfpp.so (Samsung MDFPP
+    # secure keymaster with its own TA and Root of Trust) because of these properties. Without them the HAL
+    # falls back to the generic *.msm8953.so modules, which give the ODE key manager a zero ROT.
+    setprop ro.hardware.keystore mdfpp
+    setprop ro.hardware.gatekeeper mdfpp
+    setprop ro.product.board msm8953
+    setprop ro.config.knox v30
+    setprop ro.config.knox.ucm 1
+    setprop ro.boot.flash.locked 0
+    setprop ro.crypto.fde_algorithm AES-256-XTS
     # Panel backlight is /sys/class/leds/lcd-backlight (max 365); /sys/class/backlight/panel has max 0
     write /sys/class/leds/lcd-backlight/brightness 200
 
