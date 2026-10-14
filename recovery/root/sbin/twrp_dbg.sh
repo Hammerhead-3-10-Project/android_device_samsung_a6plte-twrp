@@ -5,7 +5,7 @@ mkdir -p $M
 mount -t ext4 /dev/block/mmcblk0p43 $M
 echo "started $(date)" > $M/twrp_started.txt
 i=0
-while [ $i -lt 60 ]; do
+while [ $i -lt 15 ]; do
   {
     echo "== iteration $i $(date)"
     getprop | grep -E "usb|adb|ro.boot|init.svc|sys.boot|ro.hardware"
@@ -24,3 +24,13 @@ while [ $i -lt 60 ]; do
   i=$((i+1))
   sleep 3
 done
+
+# Self-healing end of test: clear the BCB in misc (mmcblk0p24) and reboot into Android,
+# so a failed recovery never leaves the phone looping in recovery.
+echo "clearing misc and rebooting $(date)" >> $M/twrp_started.txt
+dd if=/dev/zero of=/dev/block/mmcblk0p24 bs=1024 count=2 2>> $M/twrp_started.txt
+sync
+umount $M
+setprop sys.powerctl reboot
+sleep 5
+reboot
