@@ -117,6 +117,8 @@ TW_MAX_BRIGHTNESS := 365
 TW_DEFAULT_BRIGHTNESS := 200
 TW_EXCLUDE_DEFAULT_USB_INIT := false
 TW_HAS_DOWNLOAD_MODE := true
+# Samsung's mtpg gadget driver (f_mtp_samsung.c) registers /dev/usb_mtp_gadget instead of /dev/mtp_usb
+TW_MTP_DEVICE := /dev/usb_mtp_gadget
 TW_NO_REBOOT_BOOTLOADER := true
 TW_INCLUDE_NTFS_3G := false
 RECOVERY_SDCARD_ON_DATA := true
