@@ -1,0 +1,4 @@
+out/
+*.log
+*.img
+.DS_Store
