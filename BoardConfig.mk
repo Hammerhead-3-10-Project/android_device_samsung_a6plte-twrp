@@ -95,6 +95,10 @@ PLATFORM_VERSION := 16.1.0
 # Crypto: userdata cifrata FDE a blocco (ro.crypto.type=block, AES-256-XTS), keymaster 3.0
 # TODO verificare che la decifratura funzioni (serve il blob keymaster e vendor montato)
 TW_INCLUDE_CRYPTO := true
+# Decrypt /data (FDE, keymaster 3.0 + QSEECom + cryptfs_hw) by running the stock vold and the
+# vendor HALs from the recovery. Service names must match the init.recovery.vold_decrypt.<name>.rc
+TW_CRYPTO_USE_SYSTEM_VOLD := qseecomd hwservicemanager servicemanager keymaster-3-0 gatekeeper-1-0 cryptfshw-1-0
+TW_CRYPTO_SYSTEM_VOLD_MOUNT := vendor
 # TODO: needs vendor/qcom cryptfs_hw (libcryptfs_hw), not in the minimal manifest
 # TARGET_HW_DISK_ENCRYPTION := true
 

@@ -1,0 +1,9 @@
+# Device specific vold_decrypt service for a6plte: runs the stock vendor HAL from the recovery.
+service ven_gatekeeper-1-0 /vendor/bin/hw/android.hardware.gatekeeper@1.0-service
+    user root
+    group root
+    setenv PATH /vendor/bin:/system/bin
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64:/vendor/lib:/system/lib
+    disabled
+    oneshot
+    seclabel u:r:vold:s0
